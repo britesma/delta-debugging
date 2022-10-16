@@ -1,15 +1,20 @@
 use regex::Regex;
+use std::env;
 use std::fs;
 
 fn split_tests(tests: &str, n: usize) -> Vec<String> {
     let mut splitted_tests: Vec<String> = Vec::new();
     let mut start: usize = 0;
+    let n_el: usize = tests.len() % n;
 
-    for _i in 0..n {
-        let end: usize = start + tests.len() / n;
+    for i in 0..n {
+        let mut end: usize = start + tests.len() / n;
+        if i < n_el {
+            end += 1;
+        }
         let sub_test: String = String::from(&tests[start..end]);
         splitted_tests.push(sub_test);
-        start += tests.len() / n;
+        start = end;
     }
     return splitted_tests;
 }
@@ -44,7 +49,16 @@ fn find_one_minimal(test: &str) -> String {
     return tmp_str;
 }
 fn main() {
-    let mut data: String = fs::read_to_string("./resources/htmlPage.txt").unwrap();
+    let args: Vec<String> = env::args().collect();
+    let mut file_path: String = "./resources/".to_string();
+    let mut filename = "htmlPage.txt";
+
+    if args.len() > 1 {
+        filename = &args[1];
+    }
+
+    file_path.push_str(filename);
+    let mut data: String = fs::read_to_string(file_path).unwrap();
     let mut granularity: usize = 2;
 
     while granularity <= data.len() {
@@ -67,7 +81,6 @@ fn main() {
             }
         }
     }
-
     let one_minimal: String = find_one_minimal(&data);
-    println!("{}", one_minimal);
+    println!("Result: {}", one_minimal);
 }
